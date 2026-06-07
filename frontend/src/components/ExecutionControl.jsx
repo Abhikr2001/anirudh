@@ -27,12 +27,12 @@ const ExecutionControl = ({ status, output, onRun, disabled }) => {
         {status === 'RUNNING' ? 'Executing...' : 'Run Tests'}
       </button>
 
-      {output && (
-        <div className="output-container">
-          <h4>Execution Output</h4>
-          <pre className="output-log">{output}</pre>
-        </div>
-      )}
+      <div className="output-container">
+        <h4>Execution Output</h4>
+        <pre className="output-log" style={{ color: output ? '#10b981' : '#475569' }}>
+          {output || 'Terminal idle. Select a project and run tests...'}
+        </pre>
+      </div>
     </div>
   );
 };

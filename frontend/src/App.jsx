@@ -37,7 +37,14 @@ function App() {
       const data = await response.json();
       
       setStatus(data.status); // PASSED or FAILED
-      setOutput(data.output || data.error || data.message);
+
+      // Helper to strip ANSI escape codes from the output logs
+      const cleanLogs = (text) => {
+        if (!text) return '';
+        return text.replace(/[\u001b\u009b][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g, '');
+      };
+      
+      setOutput(cleanLogs(data.output || data.error || data.message));
 
       // Add to history
       const newHistoryItem = {
