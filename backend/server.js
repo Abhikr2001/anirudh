@@ -14,10 +14,28 @@ let isRunning = false;
 // Configure CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
   ? process.env.ALLOWED_ORIGINS.split(',')
-  : '*';
+  : [];
 
 app.use(cors({
-  origin: allowedOrigins,
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true);
+    
+    // If ALLOWED_ORIGINS is not set or contains *, allow all
+    if (allowedOrigins.length === 0 || allowedOrigins.includes('*')) {
+      return callback(null, true);
+    }
+    
+    // Allow local development and Vercel preview domains
+    if (origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:') || origin.endsWith('.vercel.app')) {
+      return callback(null, true);
+    }
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST', 'OPTIONS'],
   allowedHeaders: ['Content-Type']
 }));
@@ -69,6 +87,20 @@ app.post('/api/run-test', (req, res) => {
 
   let output = '';
   let errorOutput = '';
+  let responseSent = false;
+
+  child.on('error', (err) => {
+    if (responseSent) return;
+    responseSent = true;
+    isRunning = false;
+    console.error('[BACKEND] Failed to start test process:', err);
+    res.status(500).json({
+      status: 'FAILED',
+      project,
+      suite,
+      error: `Failed to start test execution process: ${err.message}`
+    });
+  });
 
   child.stdout.on('data', (data) => {
     const chunk = data.toString();
@@ -83,6 +115,8 @@ app.post('/api/run-test', (req, res) => {
   });
 
   child.on('close', (code) => {
+    if (responseSent) return;
+    responseSent = true;
     isRunning = false; // Reset flag
     const status = code === 0 ? 'PASSED' : 'FAILED';
     
