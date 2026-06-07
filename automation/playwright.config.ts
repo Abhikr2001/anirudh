@@ -28,8 +28,8 @@ export default defineConfig({
     /* Record video on failure */
     video: 'retain-on-failure',
 
-    /* Local demo: headless false. For CI/prod: change to true. */
-    headless: false,
+    /* Run in headless mode for server/Docker compatibility */
+    headless: true,
   },
 
   /* Configure projects for major browsers */

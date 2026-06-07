@@ -178,7 +178,7 @@ select:disabled {
   border-radius: 0.75rem;
   font-family: 'JetBrains Mono', 'Fira Code', monospace;
   font-size: 0.9rem;
-  max-height: 500px;
+  height: 400px;
   overflow-y: auto;
   white-space: pre-wrap;
   border: 1px solid #1e293b;
